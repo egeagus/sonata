@@ -38,12 +38,11 @@ We state this explicitly because the difference matters for anyone evaluating th
 
 No setup required. These links hit the live deployment:
 
-| Contract | Link |
-|---|---|
-| Hourglass Stream (testnet, ours) | [contract page](https://sonata.brages.uk/c/CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL) |
-| [ADD: a mainnet protocol, e.g. Soroswap or Blend] | [link] |
-| [ADD: a second mainnet contract] | [link] |
-
+| Contract | What it exercises | Link |
+|---|---|---|
+| Hourglass Stream | Complex ABI, 47 functions, nested structs | [open](https://sonata.brages.uk/c/CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL) |
+| Sonata test timelock | Time-gated auth patterns | [open](https://sonata.brages.uk/c/CB5LABV6SP7PQTP2EJFT7DPTFQWJEHZO7KRFA4PDTKTAY6D3JF6JDAZ5) |
+| Sonata test token | Standard token surface | [open](https://sonata.brages.uk/c/CBNZKYQLKYQSI6PQ6BS4VKTKJEVI7L5UX5CKZTBR7HKRGKEHBIY7M23F) |
 To use it from an AI agent, point any MCP client at: https://api.sonata.brages.uk/c/CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL/mcp
 
 
@@ -53,17 +52,65 @@ Every exported function of that contract appears as a callable tool. No install,
 
 ## Deployed contracts (Stellar Testnet)
 
+Three contracts are deployed on testnet and used to verify that spec reading, tool generation, and MCP invocation work across different ABI shapes.
+
+| Contract | ID |
+|---|---|
+| Hourglass Stream (`STREAM`) | `CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL` |
+| Sonata test timelock | `CB5LABV6SP7PQTP2EJFT7DPTFQWJEHZO7KRFA4PDTKTAY6D3JF6JDAZ5` |
+| Sonata test token | `CBNZKYQLKYQSI6PQ6BS4VKTKJEVI7L5UX5CKZTBR7HKRGKEHBIY7M23F` |
+
+### Hourglass Stream
+
 | | |
 |---|---|
-| Name | Hourglass Stream (`STREAM`) |
 | Contract ID | `CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL` |
 | WASM hash | `a3d62dea9d471d3719ca53556e739864791cb43cea3a19033702317865fe4d35` |
 | Deployed | 2026-09-15, ledger ~4687762 |
 | Admin | `GBXDHEVCWZCP45D5VCBLYEQFX33DTHULU6KMH5YPJ54XXOJ6DO2P3MU2` |
 | Built with | soroban-sdk 25.3.1, Rust 1.95, protocol 25 |
-| Source | [ADD: link to the contract repo] |
+| Source | [ADD: link] |
 
-A Sablier-style token streaming and vesting contract with NFT-wrapped streams (OpenZeppelin-stellar NonFungibleToken + Enumerable). 47 exported functions covering linear, tranched, recurring, and batch stream creation, withdrawal, cancellation, and the standard NFT interface. We use it as the reference contract for Sonata because no hand-written tooling exists for it, which is the case Sonata is built for.
+A Sablier-style token streaming and vesting contract with NFT-wrapped streams (OpenZeppelin-stellar NonFungibleToken + Enumerable). 47 exported functions covering linear, tranched, recurring, and batch stream creation, withdrawal, cancellation, and the standard NFT interface.
+
+This is the hardest of the three for an unassisted agent: nested argument structs (`Vec<CreateRow>`, tranche vectors), a large custom error enum, and an oracle-priced comptroller fee. It is also our reference case for the core claim, since no hand-written tooling exists for it anywhere.
+
+### Sonata test timelock
+
+| | |
+|---|---|
+| Contract ID | `CB5LABV6SP7PQTP2EJFT7DPTFQWJEHZO7KRFA4PDTKTAY6D3JF6JDAZ5` |
+| WASM hash | [ADD] |
+| Deployed | [ADD] |
+| Source | [ADD: link] |
+
+Deployed to verify MCP tool generation against time-gated authorization patterns: functions whose success depends on ledger timestamp and caller identity rather than on arguments alone. Used to confirm that generated tools surface auth requirements correctly and that failed invocations return meaningful errors rather than opaque simulation failures.
+
+### Sonata test token
+
+| | |
+|---|---|
+| Contract ID | `CBNZKYQLKYQSI6PQ6BS4VKTKJEVI7L5UX5CKZTBR7HKRGKEHBIY7M23F` |
+| WASM hash | [ADD] |
+| Deployed | [ADD] |
+| Source | [ADD: link] |
+
+A standard token contract, deployed as the control case. Exercises the common path most agents will hit: balances, transfers, allowances, and `i128` amount handling. Used to verify that generated REST routes and MCP tools produce correct results against a contract whose expected behavior is unambiguous.
+
+### Verification
+
+All three contracts are live on testnet and reachable through Sonata with no registration or configuration. Each was used to confirm end to end that:
+
+1. The SEP-48 spec is read from the deployed WASM with the contract address as the only input
+2. Every exported function appears as a typed MCP tool
+3. Tool invocation encodes arguments correctly and returns decoded results
+4. Generated REST routes and docs match the on-chain spec
+
+Contract pages:
+
+- https://sonata.brages.uk/c/CB25NO7BEWVLTAUBAMPMUDIO6VGLBGZHN6TG4TKFNM3U5M5YEXVWEWNL
+- https://sonata.brages.uk/c/CB5LABV6SP7PQTP2EJFT7DPTFQWJEHZO7KRFA4PDTKTAY6D3JF6JDAZ5
+- https://sonata.brages.uk/c/CBNZKYQLKYQSI6PQ6BS4VKTKJEVI7L5UX5CKZTBR7HKRGKEHBIY7M23F
 
 ---
 
